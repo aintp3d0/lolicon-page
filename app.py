@@ -2,7 +2,7 @@
 # coding:utf-8
 
 from flask import Flask
-from config import Configuration
+from cli.config import Configuration
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from flask_sqlalchemy import SQLAlchemy

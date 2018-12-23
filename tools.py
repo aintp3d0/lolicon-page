@@ -3,20 +3,14 @@
 
 # __author__ = 'kira@-天底 ガジ'
 
-from json import dump, load
-from config import FILE
+from json import load
 from models import Anime
-from os.path import exists
-
-
-if not exists(FILE):
-    with open(FILE, 'w') as ftw:
-        dump({}, ftw)
+from cli.config import JSWA
 
 
 def load_file():
 
-    with open(FILE) as ftr:
+    with open(JSWA) as ftr:
         data = load(ftr)
         if data:
             dwa = Anime.query.all()
