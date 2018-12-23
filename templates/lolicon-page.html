@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+    <div class="container">
+        <h1>New series marked with Green colour</h1>
+        {% for (iwa, nwa) in data %}
+            <div class="c-card">
+                <div class="card">
+                    <img class="card-img-top" src="{{ iwa.iwa }}" alt="Card image cap">
+                    <div class="card-body">
+                        <p class="card-text">{{ iwa.nwa }}</p>
+                    </div>
+                    <div>
+                        <a href="{{ iwa.lwa }}" target='_blank' class="btn btn-primary">Link to Anime-page</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
