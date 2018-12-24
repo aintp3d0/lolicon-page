@@ -6,6 +6,7 @@ import os
 
 JSWA = 'updates.json'
 DBWA = 'lolicon.db'
+RUEN = 1
 
 
 class Configuration:
