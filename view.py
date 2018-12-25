@@ -8,7 +8,7 @@ from tools import load_file
 
 @app.route('/')
 def index():
-    return render_template('lolicon-page.html'), {'data': load_file()}
+    return render_template('lolicon-page.html', data=load_file())
 
 
 @app.errorhandler(404)

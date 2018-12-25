@@ -12,13 +12,12 @@ def load_file():
 
     with open(JSWA) as ftr:
         data = load(ftr)
+        data_to_show = []
         if data:
             dwa = Anime.query.all()
-            iwa = dwa.iwa
-            data_to_show = []
-            for item in iwa:
-                if item in data.keys():
-                    data_to_show.append((item, data[item]))
-                    data.pop(item)
-
+            for item in dwa:
+                iwa = str(item.iwa)
+                if str(iwa) in data.keys():
+                    data_to_show.append((item, data[iwa]))
+                    data.pop(iwa)
             return (each for each in data_to_show)

@@ -38,6 +38,7 @@ class CheckLinks:
     def __init__(self):
         # execute script in the top level
         chdir(dirname(getcwd()))
+        self.inwa = ('http://animevost.org',)
         self.pswa = [Animevost, None]
 
         if not exists(DBWA):
@@ -46,7 +47,9 @@ class CheckLinks:
         self.conn = connect(DBWA)
         self.curr = self.conn.cursor()
         self.spwa = partial(str.split, maxsplit=1)
+        self.jnwa = partial(",".join)
         self.fawa = partial(re.findall, re.compile(r'\d+'))
+        self.swwa = partial(str.startswith, self.inwa[inwa[0]])
 
     def first_run(self):
         with connect(DBWA) as conn:
@@ -66,6 +69,10 @@ class CheckLinks:
         return bs(urlopen(url), 'lxml')
 
     def get_updates(self):
+        """updates.json will save last updates,
+        so web-app can show me updates eft when imma running app, not cli
+        cli will overwrite it if i need new updates. (tak sebe english)
+        """
         dbdata = self.curr.execute(
             'SELECT iwa, lwa, nwa, cwa, uwa FROM lwa'
         ).fetchall()
@@ -73,6 +80,7 @@ class CheckLinks:
             jdwa = self.from_json()
             for (iwa, lwa, nwa, cwa) in dbdata:
                 lswa = jdwa[iwa]
+                print(lswa)
 
             # for item in data:
             #     pass
@@ -114,14 +122,26 @@ class CheckLinks:
             return (lgwa, ",".join(cpwa[1:]))
         # series with ova
         elif SPWA and 'OVA' in SPWA:
-            return (lgwa, ",".join(cpwa[1:]), self.fawa(SPWA))
+            return (
+                lgwa,
+                f'{self.jnwa(cpwa[1:])}:{self.jnwa(self.fawa(SPWA))}'
+            )
         else:
             for debug in (nwa, RU, EN, ENWA, STWA, SPWA, cpwa, lgwa):
                 print(debug)
 
     def add_link(self, lwa):
-        cwa = 0 if 'animevost' in lwa else None
+        etwa = self.curr.execute(
+            'SELECT uwa FROM lwa WHERE lwa = ?', (lwa,)
+        ).fetchone()
+
+        if etwa:
+            exit(print('This url already exists'))
+
+        # TODO: remove DRY, find better way to do it
+        cwa = 0 if self.swwa(lwa) else None
         nwa, pwa = self.pswa[cwa](self.get_soup(lwa), 1).gen_data()
+        pwa = pwa if self.swwa(pwa) else f'{self.inwa[0]}{pwa}'
 
         if not exists(JSWA):
             self.to_json({})
@@ -131,10 +151,10 @@ class CheckLinks:
         ndwa = self.curr.execute(
             'SELECT iwa FROM lwa ORDER BY iwa DESC LIMIT 1'
         ).fetchone()
-        ndwa = ndwa if ndwa else 1
 
         nwa, uwa = self.parse_name(nwa)
-        jdwa[ndwa] = [nwa.strip(), uwa]
+        nwa = nwa.strip()
+        jdwa[ndwa[0]+1 if ndwa else 1] = [nwa, uwa]
 
         self.to_json(jdwa)
 
