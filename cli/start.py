@@ -12,8 +12,13 @@ from config import JSWA, DBWA, RUEN
 from sqlite3 import connect
 from os.path import exists, dirname
 from functools import partial
-from urllib.request import urlopen
+from urllib.request import urlopen, urlparse, urlunparse
 # from webbrowser import open_new_tab
+
+"""
+TODO:
+    update variables name
+"""
 
 
 class Animevost:
@@ -38,8 +43,7 @@ class CheckLinks:
     def __init__(self):
         # execute script in the top level
         chdir(dirname(getcwd()))
-        self.inwa = ('http://animevost.org',)
-        self.pswa = [Animevost, None]
+        self.pswa = [Animevost, ]
 
         if not exists(DBWA):
             self.first_run()
@@ -49,13 +53,20 @@ class CheckLinks:
         self.spwa = partial(str.split, maxsplit=1)
         self.jnwa = partial(",".join)
         self.fawa = partial(re.findall, re.compile(r'\d+'))
-        self.swwa = partial(str.startswith, self.inwa[inwa[0]])
 
     def first_run(self):
         with connect(DBWA) as conn:
             curr = conn.cursor()
             curr.execute("""CREATE TABLE lwa (iwa integer PRIMARY KEY,
                 nwa text, lwa text, pwa text, cwa integer, uwa text)""")
+
+    def get_parser(self, lwa):
+        # https://stackoverflow.com/questions/15799696/library-to-build-urls-in-python
+        clwa = list(urlparse(lwa))
+        for cid, cname in enumerate(self.pswa):
+            if cname.__name__.lower() in clwa[1]:
+                clwa[2] = ''
+                return (cid, self.pswa[cid], urlunparse(clwa))
 
     def to_json(self, data):
         with open(JSWA, 'w') as ftw:
@@ -95,42 +106,27 @@ class CheckLinks:
             #         return name
 
     def parse_name(self, nwa):
-        # ЦубаКума! / Uchi no Maid ga Uzasugiru! [1-12 из 12]
-
-        # Девочки волшебницы: Специальная операция / Mahou Shoujo Tokushusen
-        # Asuka [Анонс] [1 серия - 12 января]
-
-        # Мастера меча онлайн (третий сезон) / Sword Art Online 3rd Season
-        # [1-12 из 24+] [12 серия - 5 января]
-
-        # В конечном счёте я стану твоей / Yagate Kimi ni Naru [1-12 из 13]
-
-        # Как я и ожидал, моя школьная жизнь не задалась (второй сезон) /
-        # OreGairu 2 [1-13 из 13] [OVA 1 из 1]
-
+        """Return name in one of language and number of series
+        """
         RU, EN = nwa.split('/')
         ENWA = self.spwa(EN, '[')
         STWA, SPWA = self.spwa(ENWA[-1], ']')
         cpwa = self.fawa(STWA)
         lgwa = RU if not RUEN else ENWA[0]
 
-        # anons
         if not cpwa:
             return (lgwa, 0)
-        # completed series
         elif not SPWA or 'OVA' not in SPWA:
             return (lgwa, ",".join(cpwa[1:]))
-        # series with ova
         elif SPWA and 'OVA' in SPWA:
             return (
                 lgwa,
                 f'{self.jnwa(cpwa[1:])}:{self.jnwa(self.fawa(SPWA))}'
             )
-        else:
-            for debug in (nwa, RU, EN, ENWA, STWA, SPWA, cpwa, lgwa):
-                print(debug)
 
     def add_link(self, lwa):
+        """Parsing web-page, save to json file and the database
+        """
         etwa = self.curr.execute(
             'SELECT uwa FROM lwa WHERE lwa = ?', (lwa,)
         ).fetchone()
@@ -138,10 +134,9 @@ class CheckLinks:
         if etwa:
             exit(print('This url already exists'))
 
-        # TODO: remove DRY, find better way to do it
-        cwa = 0 if self.swwa(lwa) else None
+        cwa, iwa, swa = self.get_parser(lwa)
         nwa, pwa = self.pswa[cwa](self.get_soup(lwa), 1).gen_data()
-        pwa = pwa if self.swwa(pwa) else f'{self.inwa[0]}{pwa}'
+        pwa = pwa if pwa.startswith(swa) else f'{swa}{pwa}'
 
         if not exists(JSWA):
             self.to_json({})
@@ -183,7 +178,3 @@ def main(link):
 
 if __name__ == '__main__':
     main()
-    # chl = CheckLinks()
-    # chl.add_link()
-    # 'http://animevost.org/tip/tv/2174-uchi-no-maid-ga-uzasugiru.html'
-    # )
