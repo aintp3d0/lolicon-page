@@ -2,6 +2,9 @@
 
 
 {% block content %}
+    <!--https://github.com/twbs/bootstrap/issues/20321-->
+    <!--https://www.w3schools.com/css/css_margin.asp-->
+    <!--https://getbootstrap.com/docs/4.0/layout/grid/-->
 
     <div class="container">
         <h1 class="text-center">New series marked with Green colour</h1>
@@ -10,20 +13,25 @@
             <div class="row">
 
                 {% for (iwa, jwa) in data %}
+                <div class="card-deck col-md-3 col-lg-2">
                     <div class="card mr-1 ml-1">
                         <img class="card-img-top" src="{{ iwa.pwa }}" alt="Card image cap">
                         <div class="card-body px-1 py-1">
                             <h5 class="card-title mb-0 text-center">{{ iwa.nwa }}</h5>
                         </div>
                         <div class="card-footer px-1 py-1 text-right">
-                            <small class="text-muted">555\566 + 1: LastMonday13
+                            <small class="text-muted">{{ iwa.iwa }}</small>
+                            <!--<small class="text-muted">555\566 + 1: LastMonday13 12345567780</small>-->
                                 <!--<a href="{{ iwa.lwa }}" target="_blank"></a>-->
-                            </small>
+                            <!--</small>-->
                         </div>
                     </div>
+                </div>
                 {% endfor %}
+
             </div>
         </div>
+
     </div>
 
 {% endblock %}

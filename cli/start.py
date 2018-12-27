@@ -18,6 +18,7 @@ from urllib.request import urlopen, urlparse, urlunparse
 """
 TODO:
     update variables name
+    move updates.json and lolicon.db to this directory
 """
 
 
@@ -137,11 +138,18 @@ class CheckLinks:
         cwa, iwa, swa = self.get_parser(lwa)
         nwa, pwa = self.pswa[cwa](self.get_soup(lwa), 1).gen_data()
         pwa = pwa if pwa.startswith(swa) else f'{swa}{pwa}'
+        hashed_url = hash(lwa)
 
         if not exists(JSWA):
             self.to_json({})
 
         jdwa = self.from_json()
+
+        # https://stackoverflow.com/questions/4288089/reuse-identity-value-after-deleting-rows
+        for data_id, (*_, exist_hash) in jdwa.items():
+            if exist_hash == hashed_url:
+                jdwa.pop(data_id)
+
         # https://stackoverflow.com/questions/29086705/sqlite-get-max-id-not-working
         ndwa = self.curr.execute(
             'SELECT iwa FROM lwa ORDER BY iwa DESC LIMIT 1'
@@ -149,7 +157,7 @@ class CheckLinks:
 
         nwa, uwa = self.parse_name(nwa)
         nwa = nwa.strip()
-        jdwa[ndwa[0]+1 if ndwa else 1] = [nwa, uwa]
+        jdwa[ndwa[0]+1 if ndwa else 1] = [nwa, uwa, hashed_url]
 
         self.to_json(jdwa)
 
