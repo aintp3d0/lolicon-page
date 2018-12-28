@@ -5,19 +5,19 @@
 
 from json import load
 from models import Anime
-from cli.config import JSWA
+from cli.config import JSON_FILE
 
 
 def load_file():
 
-    with open(JSWA) as ftr:
+    with open(JSON_FILE) as ftr:
         data = load(ftr)
         data_to_show = []
         if data:
-            dwa = Anime.query.all()
-            for item in dwa:
-                iwa = str(item.iwa)
-                if str(iwa) in data.keys():
-                    data_to_show.append((item, data[iwa]))
-                    data.pop(iwa)
-            return (each for each in data_to_show)
+            database = Anime.query.all()
+            for item in database:
+                aid = str(item.aid)
+                if str(aid) in data.keys():
+                    data_to_show.append((item, data[aid]))
+                    data.pop(aid)
+            return data_to_show

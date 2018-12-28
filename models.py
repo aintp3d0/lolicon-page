@@ -5,10 +5,10 @@ from app import db
 
 
 class Anime(db.Model):
-    __tablename__ = 'lwa'
+    __tablename__ = 'anime'
 
-    iwa = db.Column(db.Integer, primary_key=True)
-    nwa = db.Column(db.String(50))
-    lwa = db.Column(db.String(100))
-    pwa = db.Column(db.String(100))
-    cwa = db.Column(db.Integer, nullable=False)
+    aid = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50))
+    link = db.Column(db.String(100))
+    pic = db.Column(db.String(100))
+    updates = db.Column(db.Integer, nullable=False)
