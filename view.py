@@ -7,10 +7,15 @@ from flask import render_template, send_from_directory
 from tools import load_file
 
 
+# TODO:
+#     add route('/all') - to show all links from database
+#     make route('/')   - only for showing link with updates
+
+
 @app.route('/')
 def index():
     data = load_file()
-    mg, lg = (4, 6) if len(data) < 4 else (3, 2)
+    mg, lg = (4, 4) if len(data) < 4 else (3, 2)
     return render_template('lolicon-page.html', data=load_file(), mg=mg, lg=lg)
 
 

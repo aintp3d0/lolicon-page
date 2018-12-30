@@ -17,7 +17,7 @@ def load_file():
             database = Anime.query.all()
             for item in database:
                 aid = str(item.aid)
-                if str(aid) in data.keys():
-                    data_to_show.append((item, data[aid]))
-                    data.pop(aid)
+                updated, time = data[aid][1]
+                updated -= int(item.updates)
+                data_to_show.append((item, (updated, time)))
             return data_to_show

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# __author__ = 'kira@-築城院 真鍳'
+# __author__ = 'kira@-天底 ガジ; @4m3soko <-> @amesoko'
+# __version__ = '1.0'
 
 import re
 import click
@@ -14,6 +15,17 @@ from datetime import datetime
 from functools import partial
 from urllib.request import urlopen, urlparse, urlunparse
 from multiprocessing import Pool
+
+
+# TODO:
+#     add route('/all') - to show all links from database
+#     make route('/')   - only for showing link with updates
+
+#     write parsers for sites:
+#         http://animevost.org       + wrote one
+#         http://online.anidub.com
+#         https://anistar.me
+#         https://www.anilibria.tv
 
 
 class Animevost:
@@ -38,7 +50,6 @@ class Animevost:
 class CheckLinks:
 
     def __init__(self):
-        # execute script in the top level
         self.parsers = [Animevost, ]
 
         if not exists(DB_FILE):
@@ -57,9 +68,8 @@ class CheckLinks:
         self.time = datetime.today().strftime(f"{self.days}%Y年%m月%d日")
 
         self.parser = None
-        self.database = None
+        self.default = ["0"] * 2
         self.jsondata = None
-        self.links_to_parse = None
 
     def first_run(self):
         with connect(DB_FILE) as conn:
@@ -88,9 +98,11 @@ class CheckLinks:
         return bs(urlopen(url), 'lxml')
 
     def get_updates(self, db_and_json_data):
-        """updates.json will save last updates,
-        so web-app can show me updates EFT when imma running app, not cli.
-        cli will overwrite it if i need new updates.
+        """Parsing web-page,
+            save it if any changes between last series list and the new one
+
+        Парсить страницу и подумает что есть обновление,
+            если в описание Аниме произойдет изменение
         """
         data_id, link, parser, series = db_and_json_data
         if not self.parser or self.parser != parser:
@@ -107,55 +119,67 @@ class CheckLinks:
                 new_updates += (int(new) - int(last))
 
         if new_updates:
-            last_updated_to = self.jsondata[data_id][1][0]
+            last_updated_to = self.jsondata[str(data_id)][1][0]
+            self.jsondata[str(data_id)][1] = (new_updates, self.time)
 
-            if last_updated_to != 0:
-                self.curr.execute(
-                    """UPDATE anime SET updates = ? WHERE aid = ?""",
-                    (last_updated_to, data_id)
-                )
-
-            self.jsondata[data_id][1] = (new_updates, self.time)
+            if last_updated_to != new_updates and last_updated_to != 0:
+                print('We got something!')
+                return (last_updated_to, data_id)
 
     def with_multiprocessing(self):
         dbdata = self.curr.execute(
             'SELECT aid, link, parser FROM anime'
         ).fetchall()
-
         if dbdata:
             self.jsondata = self.from_json()
+            # can't pickle sqlite3.Connection Object
+            self.conn.close()
+            del self.curr
+            del self.conn
 
+            # https://pythonprogramming.net/values-from-multiprocessing-intermediate-python-tutorial/
             pool = Pool()
-            pool.map(
+            data = pool.map(
                 self.get_updates,
                 (
                     (
-                        data_id, link, parser, self.jsondata[data_id][0]
+                        data_id, link, parser, self.jsondata[str(data_id)][0]
                     ) for data_id, link, parser in dbdata
                 )
             )
             pool.close()
-            pool.join()
+
+            fdata = filter(bool, data)
+            if fdata:
+                with connect(DB_FILE) as conn:
+                    curr = conn.cursor()
+                    curr.executemany(
+                        """UPDATE anime SET updates = ? WHERE aid = ?""",
+                        fdata
+                    )
 
     def parse_name(self, anime_name_from_h1, flag):
         """Return name in one of language and number of series
         """
         RU, EN = anime_name_from_h1.split('/')
 
+        # TODO: parse SPESHL
+        #     http://animevost.org/tip/tv/1417-overlord1.html
+        #     http://animevost.org/tip/tv/2008-saiki-kusuo-no-psi-nan-second-season.html
         name_series_ova = self.one_split(EN, '[')
         series, ova = self.one_split(name_series_ova[-1], ']')
         series_list = self.find_digits(series)
 
         ova = self.find_digits(ova)
         anime_name = RU if not RU_EN else name_series_ova[0]
-        series_and_ova = ["0,0", "0,0"]
+        series_and_ova = [self.comma_join(self.default)] * 2
 
         series_and_ova[0] = self.comma_join(
             series_list[1:] if len(series_list) > 2 else series_list
         )
 
         series_and_ova[1] = self.comma_join(
-            ova if ova else ["0", "0"]
+            ova if ova else self.default
         )
 
         series_and_ova = self.comma_join(series_and_ova)
@@ -224,10 +248,12 @@ def main(link, add_loop):
     """
     # https://www.youtube.com/watch?v=kNke39OZ2k0
     chl = CheckLinks()
+
     if link != 'link':
         chl.add_link(link)
-    else:
+    elif link and add_loop == '0':
         chl.with_multiprocessing()
+
     # for test (just add data faster), adding new data to json file
     if add_loop != '0':
         while True:

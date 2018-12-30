@@ -12,17 +12,24 @@
         <div class="card-deck justify-content-center">
             <div class="row">
 
-                {% for (iwa, jwa) in data %}
+                {% for db_item, (updates, utime) in data %}
                 <div class="card-deck col-md-{{ mg }} col-lg-{{ lg }}">
                     <div class="card mr-1 ml-1">
-                        <img class="card-img-top" src="{{ iwa.pic }}" alt="Card image cap">
+                        <img class="card-img-top" src="{{ db_item.pic }}" alt="Card image cap">
                         <div class="card-body px-1 py-1">
-                            <h5 class="card-title mb-0 text-center">{{ iwa.name }}</h5>
+                            <!--https://www.htmlgoodies.com/tutorials/colors/article.php/-->
+                            <!--3479011/How-To-Change-Text-Color-Using-HTML-and-CSS.htm-->
+                            <h5 class="card-title mb-0 text-center">
+                                {{ db_item.name }}
+                                <FONT COLOR="{% if updates %}#00FF00{% else %}#800080{% endif %}">
+                                    +{{ updates }}
+                                </FONT>
+                            </h5>
                         </div>
                         <div class="card-footer px-1 py-1 text-right">
-                            <small class="text-muted">+{{ jwa[1][0] }} T: {{ jwa[1][1] }}</small>
+                            <small class="text-muted">{{ utime }}</small>
                             <!--<small class="text-muted">555\566 + 1: LastMonday13 12345567780</small>-->
-                                <!--<a href="{{ iwa.link }}" target="_blank"></a>-->
+                                <!--<a href="{{ db_item.link }}" target="_blank"></a>-->
                             <!--</small>-->
                         </div>
                     </div>
