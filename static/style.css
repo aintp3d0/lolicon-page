@@ -1,48 +1,26 @@
-
 body {
-    background-image: url("https://wallpaperscraft.com/image/dark_anime_girl_art_dark_night_99342_3840x2400.jpg");
-
+    background-image: url("bg.jpg");
     height: 100%;
     background-position: center center;
-    background-repeat:  no-repeat;
+    background-repeat: no-repeat;
     background-attachment: fixed;
-    background-size:  cover;
-    background-color: #999;
+    background-size: cover;
 }
 
-h1 {
-    color: white;
+.row {
+    margin-right: 0px;
+    margin-left: 0px;
 }
 
-img {
-    height: 310px;
-}
-
-a {
-    text-decoration: none;
-}
-
-.container {
-    width:100%;
-    text-align:center;
-}
-.c-card {
-    float:left;
-    margin: 5px 5px 5px 5px;
+.card-deck {
+    padding: 0px;
+    margin: 3px 0px;
 }
 
 .card {
-    background-color: black;
-    width: 267px;
-    height: 420px;
+    border: 0px;
 }
 
-.card-body {
-    padding: 0.50rem;
+.card-img-top {
+    height: 100%;
 }
-
-.card-text {
-    color: white;
-    margin-bottom: 5px;
-}
-

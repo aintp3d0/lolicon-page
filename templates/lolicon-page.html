@@ -2,20 +2,43 @@
 
 
 {% block content %}
+    <!--https://github.com/twbs/bootstrap/issues/20321-->
+    <!--https://www.w3schools.com/css/css_margin.asp-->
+    <!--https://getbootstrap.com/docs/4.0/layout/grid/-->
+
     <div class="container">
-        <h1>New series marked with Green colour</h1>
-        {% for (iwa, nwa) in data %}
-            <div class="c-card">
-                <div class="card">
-                    <img class="card-img-top" src="{{ iwa.iwa }}" alt="Card image cap">
-                    <div class="card-body">
-                        <p class="card-text">{{ iwa.nwa }}</p>
-                    </div>
-                    <div>
-                        <a href="{{ iwa.lwa }}" target='_blank' class="btn btn-primary">Link to Anime-page</a>
+        <h1 class="text-center">New series marked with Green colour</h1>
+
+        <div class="card-deck justify-content-center">
+            <div class="row">
+
+                {% for db_item, (updates, utime) in data %}
+                <div class="card-deck col-md-{{ mg }} col-lg-{{ lg }}">
+                    <div class="card mr-1 ml-1">
+                        <img class="card-img-top" src="{{ db_item.pic }}" alt="Card image cap">
+                        <div class="card-body px-1 py-1">
+                            <!--https://www.htmlgoodies.com/tutorials/colors/article.php/-->
+                            <!--3479011/How-To-Change-Text-Color-Using-HTML-and-CSS.htm-->
+                            <h5 class="card-title mb-0 text-center">
+                                {{ db_item.name }}
+                                <FONT COLOR="{% if updates %}#00FF00{% else %}#800080{% endif %}">
+                                    +{{ updates }}
+                                </FONT>
+                            </h5>
+                        </div>
+                        <div class="card-footer px-1 py-1 text-right">
+                            <small class="text-muted">{{ utime }}</small>
+                            <!--<small class="text-muted">555\566 + 1: LastMonday13 12345567780</small>-->
+                                <!--<a href="{{ db_item.link }}" target="_blank"></a>-->
+                            <!--</small>-->
+                        </div>
                     </div>
                 </div>
+                {% endfor %}
+
             </div>
-        {% endfor %}
+        </div>
+
     </div>
+
 {% endblock %}
