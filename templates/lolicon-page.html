@@ -7,7 +7,6 @@
     <!--https://getbootstrap.com/docs/4.0/layout/grid/-->
 
     <div class="container">
-        <h1 class="text-center">New series marked with Green colour</h1>
 
         <div class="card-deck justify-content-center">
             <div class="row">
@@ -19,18 +18,21 @@
                         <div class="card-body px-1 py-1">
                             <!--https://www.htmlgoodies.com/tutorials/colors/article.php/-->
                             <!--3479011/How-To-Change-Text-Color-Using-HTML-and-CSS.htm-->
-                            <h5 class="card-title mb-0 text-center">
-                                {{ db_item.name }}
-                                <FONT COLOR="{% if updates %}#00FF00{% else %}#800080{% endif %}">
-                                    +{{ updates }}
-                                </FONT>
-                            </h5>
+                            <a href="{{ db_item.link }}" target="_blank">
+                                <h5 class="card-title mb-0 text-center">
+                                    {{ db_item.name }}
+                                    <FONT COLOR="{% if updates %}#00FF00{% else %}#800080{% endif %}">
+                                        +{{ updates }}
+                                    </FONT>
+                                </h5>
+                            </a>
                         </div>
                         <div class="card-footer px-1 py-1 text-right">
                             <small class="text-muted">{{ utime }}</small>
-                            <!--<small class="text-muted">555\566 + 1: LastMonday13 12345567780</small>-->
-                                <!--<a href="{{ db_item.link }}" target="_blank"></a>-->
-                            <!--</small>-->
+                            <!--https://www.reddit.com/r/flask/comments/5c5ud5/passing_arguments_url_for/-->
+                            <a href="{{ url_for('remove_link', aid=db_item.aid) }}">
+                                <i class="fas fa-eraser"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
