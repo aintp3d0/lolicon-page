@@ -6,9 +6,10 @@
 
 import re
 import click
+from os import remove
 from bs4 import BeautifulSoup as bs
 from json import dump, load
-from config import JSON_FILE, DB_FILE, RU_EN
+from config import JSON_FILE, REM_FILE, DB_FILE, RU_EN
 from sqlite3 import connect
 from os.path import exists
 from datetime import datetime
@@ -17,15 +18,11 @@ from urllib.request import urlopen, urlparse, urlunparse
 from multiprocessing import Pool
 
 
-# TODO:
-#     add route('/all') - to show all links from database
-#     make route('/')   - only for showing link with updates
-
-#     write parsers for sites:
-#         http://animevost.org       + wrote one
-#         http://online.anidub.com
-#         https://anistar.me
-#         https://www.anilibria.tv
+# TODO write parsers for sites:
+#     http://animevost.org       + wrote one
+#     http://online.anidub.com
+#     https://anistar.me
+#     https://www.anilibria.tv
 
 
 class Animevost:
@@ -61,6 +58,9 @@ class CheckLinks:
         self.comma_join = partial(",".join)
         self.find_digits = partial(re.findall, re.compile(r'\d+'))
 
+        if exists(REM_FILE):
+            self.update_json()
+
         # https://github.com/hhiki/isshuukan_friends/blob/master/Kaori_.py
         self.days = [
             '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日', '日曜日'
@@ -77,6 +77,16 @@ class CheckLinks:
             curr.execute("""CREATE TABLE
             anime (aid integer PRIMARY KEY,
             name text, link text, pic text, parser integer, updates text)""")
+
+    def update_json(self):
+        data = self.from_json()
+
+        with open(REM_FILE, 'r') as ftr:
+            for i in filter(self.find_digits, ftr.readlines()):
+                data.pop(i)
+
+        self.to_json(data)
+        remove(REM_FILE)
 
     def get_parser(self, lwa):
         # https://stackoverflow.com/questions/15799696/library-to-build-urls-in-python
@@ -123,7 +133,7 @@ class CheckLinks:
             self.jsondata[str(data_id)][1] = (new_updates, self.time)
 
             if last_updated_to != new_updates and last_updated_to != 0:
-                print('We got something!')
+                print('INFO> We got something!')
                 return (last_updated_to, data_id)
 
     def with_multiprocessing(self):
@@ -149,7 +159,7 @@ class CheckLinks:
             )
             pool.close()
 
-            fdata = filter(bool, data)
+            fdata = tuple(filter(bool, data))
             if fdata:
                 with connect(DB_FILE) as conn:
                     curr = conn.cursor()
@@ -157,6 +167,8 @@ class CheckLinks:
                         """UPDATE anime SET updates = ? WHERE aid = ?""",
                         fdata
                     )
+            else:
+                print('INFO> No updates yet!')
 
     def parse_name(self, anime_name_from_h1, flag):
         """Return name in one of language and number of series

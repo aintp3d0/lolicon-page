@@ -5,6 +5,7 @@ import os
 
 
 JSON_FILE = os.path.join(os.path.dirname(__file__), 'updates.json')
+REM_FILE = os.path.join(os.path.dirname(__file__), 'removed_aid.txt')
 DB_FILE = 'lolicon.db'
 RU_EN = 1
 

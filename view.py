@@ -2,21 +2,32 @@
 # -*- coding: utf-8 -*-
 
 import os
-from app import app
-from flask import render_template, send_from_directory
-from tools import load_file
-
-
-# TODO:
-#     add route('/all') - to show all links from database
-#     make route('/')   - only for showing link with updates
+from app import app, db
+from flask import render_template, send_from_directory, redirect, url_for
+from tools import load_file, remove_aid
 
 
 @app.route('/')
 def index():
-    data = load_file()
+    data = load_file(1)
     mg, lg = (4, 4) if len(data) < 4 else (3, 2)
-    return render_template('lolicon-page.html', data=load_file(), mg=mg, lg=lg)
+    return render_template('lolicon-page.html', data=data, mg=mg, lg=lg)
+
+
+@app.route('/all')
+def anime_list():
+    data = load_file(0)
+    mg, lg = (4, 4) if len(data) < 4 else (3, 2)
+    return render_template('lolicon-page.html', data=data, mg=mg, lg=lg)
+
+
+@app.route('/remove/<aid>/')
+def remove_link(aid):
+    # http://exploreflask.com/en/latest/views.html
+    # https://stackoverflow.com/questions/27158573/how-to-delete-a-record-by-id-in-flask-sqlalchemy
+    if remove_aid(aid):
+        db.session.commit()
+    return redirect(url_for('anime_list'))
 
 
 @app.route('/favicon.ico')
