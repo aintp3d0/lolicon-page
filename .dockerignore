@@ -1,0 +1,6 @@
+# https://codefresh.io/docker-tutorial/not-ignore-dockerignore/
+
+.git
+__pycache__/
+*.pyc
+*.swp

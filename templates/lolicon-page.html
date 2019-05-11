@@ -9,8 +9,27 @@
     <div class="container">
 
         <div class="card-deck justify-content-center">
-            <div class="row">
 
+            {% if flag %}
+                <form  method="POST" action="{{ url_for('index') }}">
+                    <div class="form-inline">
+                        <div class="form-group">
+                            <input
+                                name="value"
+                                type="text"
+                                class="form-control"
+                                style="width: 600px;"
+                                placeholder="http://animevost.org/???">
+                            <input
+                                type="submit"
+                                style="margin-left: 5px;"
+                                class="btn btn-primary">
+                        </div>
+                    </div>
+                </form>
+            {% endif %}
+
+            <div class="row content-center">
                 {% for db_item, (updates, utime) in data %}
                 <div class="card-deck col-md-{{ mg }} col-lg-{{ lg }}">
                     <div class="card mr-1 ml-1">

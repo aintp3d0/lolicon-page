@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# __author__ = 'kira@-天底 ガジ; @4m3soko <-> @amesoko'
-# __version__ = '1.0'
+# __author__ = 'kira@-天底 ガジ'
+# __version__ = '1.1'
+
 
 import re
 import click
@@ -13,8 +14,9 @@ from config import JSON_FILE, REM_FILE, DB_FILE, RU_EN
 from sqlite3 import connect
 from os.path import exists
 from datetime import datetime
+from requests import get
 from functools import partial
-from urllib.request import urlopen, urlparse, urlunparse
+from urllib.request import urlparse, urlunparse
 from multiprocessing import Pool
 
 
@@ -61,7 +63,7 @@ class CheckLinks:
         if exists(REM_FILE):
             self.update_json()
 
-        # https://github.com/hhiki/isshuukan_friends/blob/master/Kaori_.py
+        # https://github.com/4m3s0k0/isshuukan_friends/blob/master/Kaori_.py
         self.days = [
             '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日', '日曜日'
         ][datetime.weekday(datetime.now())]
@@ -105,7 +107,7 @@ class CheckLinks:
             return load(ftr)
 
     def get_soup(self, url):
-        return bs(urlopen(url), 'lxml')
+        return bs(get(url).text, 'lxml')
 
     def get_updates(self, db_and_json_data):
         """Parsing web-page,
@@ -134,7 +136,7 @@ class CheckLinks:
 
             if last_updated_to != new_updates and last_updated_to != 0:
                 print('INFO> We got something!')
-                return (last_updated_to, data_id)
+                return (new_updates, data_id)
 
     def with_multiprocessing(self):
         dbdata = self.curr.execute(
@@ -164,14 +166,12 @@ class CheckLinks:
                 with connect(DB_FILE) as conn:
                     curr = conn.cursor()
                     curr.executemany(
-                        """UPDATE anime SET updates = ? WHERE aid = ?""",
+                        """UPDATE anime SET updates=? WHERE aid=?""",
                         fdata
                     )
-            else:
-                print('INFO> No updates yet!')
 
     def parse_name(self, anime_name_from_h1, flag):
-        """Return name in one of language and number of series
+        """Return name in one of languages and number of series
         """
         RU, EN = anime_name_from_h1.split('/')
 
@@ -205,8 +205,6 @@ class CheckLinks:
         ).fetchone()
 
         if etwa:
-            # continue for *add_loop
-            print('INFO> This url already exists')
             return None
 
         parser, aid, base_url = self.get_parser(link)

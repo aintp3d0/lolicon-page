@@ -11,6 +11,7 @@ RU_EN = 1
 
 
 class Configuration:
+    HOST = '0.0.0.0'
     DEBUG = True
     SECRET_KEY = 'LOLI_RULES'
     db_path = os.path.join(os.path.dirname(__file__), DB_FILE)
