@@ -27,5 +27,5 @@ docker run -d -p 1234:5000 kiratanya/lolichan
 0.0.0.0:1234
 
 ```
-![test-pic](https://raw.githubusercontent.com/hhiki/lolicon-page/master/test-pic/lolicon-page.jpg)
-![test-pic_version_1](https://raw.githubusercontent.com/hhiki/lolicon-page/master/test-pic/lolicon-page_v_1.jpg)
+![test-pic](/test-pic/lolicon-page.jpg)
+![test-pic_version_1](/test-pic/lolicon-page_v_1.jpg)
